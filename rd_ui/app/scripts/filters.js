@@ -48,14 +48,15 @@ angular.module('redash.filters', []).
 
   .filter('colWidth', function () {
     return function (widgetWidth) {
-      if (widgetWidth == 0) {
+      if (widgetWidth === 0) {
         return 0;
-      }
-      if (widgetWidth == 1) {
+      } else if (widgetWidth === 1) {
         return 6;
+      } else if (widgetWidth === 2) {
+        return 12;
       }
-      return 12;
-    }
+      return widgetWidth;
+    };
   })
 
   .filter('capitalize', function () {
@@ -71,6 +72,9 @@ angular.module('redash.filters', []).
 
   .filter('dateTime', function() {
     return function(value) {
+      if (!value) {
+        return '-';
+      }
       return moment(value).format(clientConfig.dateTimeFormat);
     }
   })

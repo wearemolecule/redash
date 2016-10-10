@@ -1,8 +1,11 @@
+from __future__ import absolute_import
+
 from random import randint
 from celery import Celery
 from datetime import timedelta
 from celery.schedules import crontab
 from redash import settings, __version__
+from redash.metrics import celery
 
 
 celery = Celery('redash',
@@ -20,7 +23,7 @@ celery_schedule = {
     },
     'refresh_schemas': {
         'task': 'redash.tasks.refresh_schemas',
-        'schedule': timedelta(minutes=30)
+        'schedule': timedelta(minutes=settings.SCHEMAS_REFRESH_SCHEDULE)
     }
 }
 
@@ -40,7 +43,8 @@ if settings.QUERY_RESULTS_CLEANUP_ENABLED:
 
 celery.conf.update(CELERY_RESULT_BACKEND=settings.CELERY_BACKEND,
                    CELERYBEAT_SCHEDULE=celery_schedule,
-                   CELERY_TIMEZONE='UTC')
+                   CELERY_TIMEZONE='UTC',
+                   CELERY_TASK_RESULT_EXPIRES=settings.CELERY_TASK_RESULT_EXPIRES)
 
 if settings.SENTRY_DSN:
     from raven import Client
@@ -48,3 +52,5 @@ if settings.SENTRY_DSN:
 
     client = Client(settings.SENTRY_DSN, release=__version__)
     register_signal(client)
+
+

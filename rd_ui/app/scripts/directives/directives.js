@@ -120,36 +120,6 @@
     }
   });
 
-  directives.directive('rdTabs', ['$location', function ($location) {
-    return {
-      restrict: 'E',
-      scope: {
-        tabsCollection: '=',
-        selectedTab: '='
-      },
-      template: '<ul class="tab-nav bg-white"><li ng-class="{active: tab==selectedTab}" ng-repeat="tab in tabsCollection"><a href="{{basePath}}#{{tab.key}}">{{tab.name}}</a></li></ul>',
-      replace: true,
-      link: function ($scope, element, attrs) {
-        $scope.basePath = $location.path().substring(1);
-        $scope.selectTab = function (tabKey) {
-          $scope.selectedTab = _.find($scope.tabsCollection, function (tab) {
-            return tab.key == tabKey;
-          });
-        }
-
-        $scope.$watch(function () {
-          return $location.hash()
-        }, function (hash) {
-          if (hash) {
-            $scope.selectTab($location.hash());
-          } else {
-            $scope.selectTab($scope.tabsCollection[0].key);
-          }
-        });
-      }
-    }
-  }]);
-
   // From: http://jsfiddle.net/joshdmiller/NDFHg/
   directives.directive('editInPlace', function () {
     return {
@@ -483,7 +453,7 @@
       restrict: 'E',
       transclude: true,
       templateUrl: '/views/directives/settings_screen.html',
-      link: function(scope, elem, attrs) {
+      controller: ['$scope', function(scope) {
         scope.usersPage = _.string.startsWith($location.path(), '/users');
         scope.groupsPage = _.string.startsWith($location.path(), '/groups');
         scope.dsPage = _.string.startsWith($location.path(), '/data_sources');
@@ -494,9 +464,103 @@
         scope.showUsersLink = currentUser.hasPermission('list_users');
         scope.showDsLink = currentUser.hasPermission('admin');
         scope.showDestinationsLink = currentUser.hasPermission('admin');
+      }]
+    }
+  }]);
+
+  directives.directive('tabNav', ['$location', function($location) {
+    return {
+      restrict: 'E',
+      transclude: true,
+      scope: {
+        tabs: '='
+      },
+      template: '<ul class="tab-nav bg-white">' +
+                  '<li ng-repeat="tab in tabs" ng-class="{\'active\': tab.active }"><a ng-href="{{tab.path}}">{{tab.name}}</a></li>' +
+                '</ul>',
+      link: function($scope) {
+        _.each($scope.tabs, function(tab) {
+          if (tab.isActive) {
+            tab.active = tab.isActive($location.path());
+          } else {
+            tab.active = _.string.startsWith($location.path(), "/" + tab.path);
+          }
+        });
       }
     }
   }]);
+
+  directives.directive('queriesList', [function () {
+    return {
+      restrict: 'E',
+      replace: true,
+      scope: {
+        queries: '=',
+        total: '=',
+        selectPage: '=',
+        page: '=',
+        pageSize: '='
+      },
+      templateUrl: '/views/directives/queries_list.html',
+      link: function ($scope) {
+        function hasNext() {
+          return !($scope.page * $scope.pageSize >= $scope.total);
+        }
+
+        function hasPrevious() {
+          return $scope.page !== 1;
+        }
+
+        function updatePages() {
+          if ($scope.total === undefined) {
+            return;
+          }
+
+          var maxSize = 5;
+          var pageCount = Math.ceil($scope.total/$scope.pageSize);
+          var pages = [];
+
+          function makePage(title, page, disabled) {
+            return {title: title, page: page, active: page == $scope.page, disabled: disabled};
+          }
+
+          // Default page limits
+          var startPage = 1, endPage = pageCount;
+
+          // recompute if maxSize
+          if (maxSize && maxSize < pageCount) {
+            startPage = Math.max($scope.page - Math.floor(maxSize / 2), 1);
+            endPage = startPage + maxSize - 1;
+
+            // Adjust if limit is exceeded
+            if (endPage > pageCount) {
+              endPage = pageCount;
+              startPage = endPage - maxSize + 1;
+            }
+          }
+
+          // Add page number links
+          for (var number = startPage; number <= endPage; number++) {
+            var page = makePage(number, number, false);
+            pages.push(page);
+          }
+
+          // Add previous & next links
+          var previousPage = makePage('<', $scope.page - 1, !hasPrevious());
+          pages.unshift(previousPage);
+
+          var nextPage = makePage('>', $scope.page + 1, !hasNext());
+          pages.push(nextPage);
+
+          $scope.pages = pages;
+        }
+
+        $scope.$watch('total', updatePages);
+        $scope.$watch('page', updatePages);
+      }
+    }
+  }]);
+
 
   directives.directive('parameters', ['$location', '$modal', function($location, $modal) {
     return {

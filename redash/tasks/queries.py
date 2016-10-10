@@ -57,8 +57,6 @@ class QueryTaskTracker(object):
         self.data['updated_at'] = time.time()
         key_name = self._key_name(self.data['task_id'])
         connection.set(key_name, utils.json_dumps(self.data))
-        connection.zadd('query_task_trackers', time.time(), key_name)
-
         connection.zadd(self._get_list(), time.time(), key_name)
 
         for l in self.ALL_LISTS:
@@ -344,15 +342,29 @@ def refresh_schemas():
     """
     Refreshes the data sources schemas.
     """
+
+    blacklist = [int(ds_id) for ds_id in redis_connection.smembers('data_sources:schema:blacklist') if ds_id]
+
+    global_start_time = time.time()
+
+    logger.info(u"task=refresh_schemas state=start")
+
     for ds in models.DataSource.select():
         if ds.paused:
-            logger.info(u"Skipping refresh schema of %s because it is paused (%s).", ds.name, ds.pause_reason)
+            logger.info(u"task=refresh_schema state=skip ds_id=%s reason=paused(%s)", ds.id, ds.pause_reason)
+        elif ds.id in blacklist:
+            logger.info(u"task=refresh_schema state=skip ds_id=%s reason=blacklist", ds.id)
         else:
-            logger.info(u"Refreshing schema for: {}".format(ds.name))
+            logger.info(u"task=refresh_schema state=start ds_id=%s", ds.id)
+            start_time = time.time()
             try:
                 ds.get_schema(refresh=True)
+                logger.info(u"task=refresh_schema state=finished ds_id=%s runtime=%.2f", ds.id, time.time() - start_time)
             except Exception:
                 logger.exception(u"Failed refreshing schema for the data source: %s", ds.name)
+                logger.info(u"task=refresh_schema state=failed ds_id=%s runtime=%.2f", ds.id, time.time() - start_time)
+
+    logger.info(u"task=refresh_schemas state=finish total_runtime=%.2f", time.time() - global_start_time)
 
 
 def signal_handler(*args):
@@ -389,7 +401,14 @@ class QueryExecutor(object):
 
         query_runner = self.data_source.query_runner
         annotated_query = self._annotate_query(query_runner)
-        data, error = query_runner.run_query(annotated_query)
+
+        try:
+            data, error = query_runner.run_query(annotated_query)
+        except Exception as e:
+            error = unicode(e)
+            data = None
+            logging.warning('Unexpected error while running query:', exc_info=1)
+
         run_time = time.time() - self.tracker.started_at
         self.tracker.update(error=error, run_time=run_time, state='saving_results')
 

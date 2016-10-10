@@ -446,6 +446,14 @@
           method: 'get',
           isArray: true,
           url: "api/queries/recent"
+        },
+        query: {
+          isArray: false
+        },
+        myQueries: {
+          method: 'get',
+          isArray: false,
+          url: "api/queries/my"
         }
       });
 

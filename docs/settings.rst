@@ -11,13 +11,16 @@ The follow is a list of settings and what they control:
 - **REDASH_STATSD_HOST**: *default "127.0.0.1"*
 - **REDASH_STATSD_PORT**: *default "8125"*
 - **REDASH_STATSD_PREFIX**: *default "redash"*
+- **REDASH_STATSD_USE_TAGS**: whether to use tags in StatsD metrics (InfluxDB's format), *default false*
 - **REDASH_DATABASE_URL**: *default "postgresql://postgres"*
 - **REDASH_CELERY_BROKER**: *default REDIS_URL*
 - **REDASH_CELERY_BACKEND**: *default CELERY_BROKER*
+- **REDASH_CELERY_TASK_RESULT_EXPIRES**: How many seconds to keep Celery task results in cache (in seconds), *default 3600*
 - **REDASH_HEROKU_CELERY_WORKER_COUNT**: *default 2*
 - **REDASH_QUERY_RESULTS_CLEANUP_ENABLED**: *default "true"*
 - **REDASH_QUERY_RESULTS_CLEANUP_COUNT**: *default "100"*
 - **REDASH_QUERY_RESULTS_CLEANUP_MAX_AGE**: *default "7"*
+- **REDASH_SCHEMAS_REFRESH_SCHEDULE**: how often to refresh the data sources schemas (in minutes), *default 30*
 - **REDASH_AUTH_TYPE**: *default "api_key"*
 - **REDASH_PASSWORD_LOGIN_ENABLED**: *default "true"*
 - **REDASH_ENFORCE_HTTPS**: *default "false"*
@@ -40,11 +43,6 @@ The follow is a list of settings and what they control:
 - **REDASH_MAIL_MAX_EMAILS**: *default None*
 - **REDASH_MAIL_ASCII_ATTACHMENTS**: *default "false"*
 - **REDASH_HOST**: *default ""*
-- **REDASH_HIPCHAT_API_TOKEN**: *default None*
-- **REDASH_HIPCHAT_API_URL**: *default None*
-- **REDASH_HIPCHAT_ROOM_ID**: *default None*
-- **REDASH_WEBHOOK_ENDPOINT**: *default None*
-- **REDASH_WEBHOOK_USERNAME**: *default None*
 - **REDASH_CORS_ACCESS_CONTROL_ALLOW_ORIGIN**: *default ""*
 - **REDASH_CORS_ACCESS_CONTROL_ALLOW_CREDENTIALS**: *default "false"*
 - **REDASH_CORS_ACCESS_CONTROL_REQUEST_METHOD**: *default GET, POST, PUT""*
@@ -55,7 +53,7 @@ The follow is a list of settings and what they control:
 - **REDASH_ALLOW_SCRIPTS_IN_USER_INPUT**: disable sanitization of text input, allowing full HTML, *default "true"*
 - **REDASH_DATE_FORMAT**: *default "DD/MM/YY"*
 - **REDASH_FEATURE_ALLOW_ALL_TO_EDIT**: *default "true"*
-- **REDASH_FEATURE_TABLES_PERMISSIONS**: *default "false"*
+- **REDASH_FEATURE_SHOW_QUERY_RESULTS_COUNT**: disable/enable showing count of query results in status, *default "true"*
 - **REDASH_VERSION_CEHCK**: *default "true"*
 - **REDASH_FEATURE_DISABLE_REFRESH_QUERIES**: disable scheduled query execution, *default "false"*
 - **REDASH_BIGQUERY_HTTP_TIMEOUT**: *default "600"*

@@ -52,7 +52,7 @@ def all_settings():
     return settings
 
 
-NAME = os.environ.get('REDASH_NAME', 're:dash')
+NAME = os.environ.get('REDASH_NAME', 'Redash')
 LOGO_URL = os.environ.get('REDASH_LOGO_URL', '/images/redash_icon_small.png')
 
 REDIS_URL = os.environ.get('REDASH_REDIS_URL', os.environ.get('REDIS_URL', "redis://localhost:6379/0"))
@@ -61,6 +61,7 @@ PROXIES_COUNT = int(os.environ.get('REDASH_PROXIES_COUNT', "1"))
 STATSD_HOST = os.environ.get('REDASH_STATSD_HOST', "127.0.0.1")
 STATSD_PORT = int(os.environ.get('REDASH_STATSD_PORT', "8125"))
 STATSD_PREFIX = os.environ.get('REDASH_STATSD_PREFIX', "redash")
+STATSD_USE_TAGS = parse_boolean(os.environ.get('REDASH_STATSD_USE_TAGS', "false"))
 
 # Connection settings for re:dash's own database (where we store the queries, results, etc)
 DATABASE_CONFIG = parse_db_url(os.environ.get("REDASH_DATABASE_URL", os.environ.get('DATABASE_URL', "postgresql://postgres")))
@@ -68,20 +69,20 @@ DATABASE_CONFIG = parse_db_url(os.environ.get("REDASH_DATABASE_URL", os.environ.
 # Celery related settings
 CELERY_BROKER = os.environ.get("REDASH_CELERY_BROKER", REDIS_URL)
 CELERY_BACKEND = os.environ.get("REDASH_CELERY_BACKEND", CELERY_BROKER)
+CELERY_TASK_RESULT_EXPIRES = int(os.environ.get('REDASH_CELERY_TASK_RESULT_EXPIRES', 3600))
 
 # The following enables periodic job (every 5 minutes) of removing unused query results.
 QUERY_RESULTS_CLEANUP_ENABLED = parse_boolean(os.environ.get("REDASH_QUERY_RESULTS_CLEANUP_ENABLED", "true"))
 QUERY_RESULTS_CLEANUP_COUNT = int(os.environ.get("REDASH_QUERY_RESULTS_CLEANUP_COUNT", "100"))
 QUERY_RESULTS_CLEANUP_MAX_AGE = int(os.environ.get("REDASH_QUERY_RESULTS_CLEANUP_MAX_AGE", "7"))
 
+SCHEMAS_REFRESH_SCHEDULE = int(os.environ.get("REDASH_SCHEMAS_REFRESH_SCHEDULE", 30))
+
 AUTH_TYPE = os.environ.get("REDASH_AUTH_TYPE", "api_key")
 PASSWORD_LOGIN_ENABLED = parse_boolean(os.environ.get("REDASH_PASSWORD_LOGIN_ENABLED", "true"))
 ENFORCE_HTTPS = parse_boolean(os.environ.get("REDASH_ENFORCE_HTTPS", "false"))
 
 MULTI_ORG = parse_boolean(os.environ.get("REDASH_MULTI_ORG", "false"))
-
-# The following is deprecated and should be defined with the Organization object
-GOOGLE_APPS_DOMAIN = set_from_string(os.environ.get("REDASH_GOOGLE_APPS_DOMAIN", ""))
 
 GOOGLE_CLIENT_ID = os.environ.get("REDASH_GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("REDASH_GOOGLE_CLIENT_SECRET", "")
@@ -140,13 +141,7 @@ MAIL_ASCII_ATTACHMENTS = parse_boolean(os.environ.get('REDASH_MAIL_ASCII_ATTACHM
 
 HOST = os.environ.get('REDASH_HOST', '')
 
-HIPCHAT_API_TOKEN = os.environ.get('REDASH_HIPCHAT_API_TOKEN', None)
-HIPCHAT_API_URL = os.environ.get('REDASH_HIPCHAT_API_URL', None)
-HIPCHAT_ROOM_ID = os.environ.get('REDASH_HIPCHAT_ROOM_ID', None)
-
-WEBHOOK_ENDPOINT = os.environ.get('REDASH_WEBHOOK_ENDPOINT', None)
-WEBHOOK_USERNAME = os.environ.get('REDASH_WEBHOOK_USERNAME', None)
-WEBHOOK_PASSWORD = os.environ.get('REDASH_WEBHOOK_PASSWORD', None)
+ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE = os.environ.get('REDASH_ALERTS_DEFAULT_MAIL_SUBJECT_TEMPLATE', "({state}) {alert_name}")
 
 # CORS settings for the Query Result API (and possbily future external APIs).
 # In most cases all you need to do is set REDASH_CORS_ACCESS_CONTROL_ALLOW_ORIGIN
@@ -208,9 +203,9 @@ DATE_FORMAT = os.environ.get("REDASH_DATE_FORMAT", "DD/MM/YY")
 
 # Features:
 FEATURE_ALLOW_ALL_TO_EDIT_QUERIES = parse_boolean(os.environ.get("REDASH_FEATURE_ALLOW_ALL_TO_EDIT", "true"))
-FEATURE_TABLES_PERMISSIONS = parse_boolean(os.environ.get("REDASH_FEATURE_TABLES_PERMISSIONS", "false"))
 VERSION_CHECK = parse_boolean(os.environ.get("REDASH_VERSION_CHECK", "true"))
 FEATURE_DISABLE_REFRESH_QUERIES = parse_boolean(os.environ.get("REDASH_FEATURE_DISABLE_REFRESH_QUERIES", "false"))
+FEATURE_SHOW_QUERY_RESULTS_COUNT = parse_boolean(os.environ.get("REDASH_FEATURE_SHOW_QUERY_RESULTS_COUNT", "true"))
 
 # BigQuery
 BIGQUERY_HTTP_TIMEOUT = int(os.environ.get("REDASH_BIGQUERY_HTTP_TIMEOUT", "600"))
