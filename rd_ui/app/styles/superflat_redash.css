@@ -2262,7 +2262,7 @@ th {
 .table > tbody > tr > td,
 .table > tfoot > tr > td {
   padding: 10px;
-  line-height: 0.71428572;
+  line-height: 1.42857143;
   vertical-align: top;
   border-top: 1px solid #f0f0f0;
 }
@@ -9141,6 +9141,9 @@ h6 .label {
 .table > tbody > tr > td:last-child,
 .table > tfoot > tr > td:last-child {
   padding-right: 30px;
+}
+.table tbody > tr:last-child > td {
+  padding-bottom: 20px;
 }
 .table-bordered {
   border: 0;
