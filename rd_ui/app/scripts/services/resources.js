@@ -496,7 +496,7 @@
       if (!this.query) {
         return;
       }
-      var queryText = this.editor.getSelectedText();
+      var queryText = this.editor ? this.editor.getSelectedText() : "";
       if (queryText === "") {
         queryText = this.query;
       }
